@@ -82,27 +82,6 @@
   - 60-79: ⚠️ MODERATE
   - 0-59: 🚨 UNFAIR
 
-## 🛡️ Security & API Keys
-
-- **Never commit your real API keys!**
-- `secrets.env` is in `.gitignore` and will not be committed.
-- Use `secrets.env.example` as a template for sharing.
-
-## 📋 Demo Usage
-
-1. **Load the Interface:** Run `python3 server.py` or open `index.html`
-2. **Enter Document:** Paste your Terms of Service or use the sample
-3. **Click Analyze:** See fairness score, risks, compliance, and recommendations
-4. **Chatbot:** Ask questions about the document, risks, or legal terms
-
-## 🤝 Contributing
-
-Contributions welcome! Areas for improvement:
-- Additional risk patterns
-- More compliance frameworks
-- Enhanced chatbot responses
-- Mobile app development
-
 ## 📄 License
 
 MIT License - see LICENSE file for details
