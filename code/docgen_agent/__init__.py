@@ -1,20 +1,28 @@
-"""Main entry point for the report generation workflow."""
+"""
+Document generation agent package.
+"""
 
-import asyncio
-from typing import Any
+from . import agent, author, legal_agent, document_parser, risk_analyzer, researcher, tools, models
+from .agent import graph as agent_graph
+from .author import graph as author_graph
+from .legal_agent import graph as legal_graph
+from .document_parser import graph as parser_graph
+from .risk_analyzer import graph as risk_graph
+from .researcher import graph as researcher_graph
 
-from .agent import AgentState, graph
-
-
-async def async_write_report(
-    topic: str, report_structure: str
-) -> Any | dict[str, Any] | None:
-    """Write a report."""
-    state = AgentState(topic=topic, report_structure=report_structure)
-    result = await graph.ainvoke(state)
-    return result
-
-
-def write_report(topic: str, report_structure: str) -> Any | dict[str, Any] | None:
-    """Write a report."""
-    return asyncio.run(async_write_report(topic, report_structure))
+__all__ = [
+    "agent",
+    "author", 
+    "legal_agent",
+    "document_parser",
+    "risk_analyzer",
+    "researcher",
+    "tools",
+    "models",
+    "agent_graph",
+    "author_graph",
+    "legal_graph", 
+    "parser_graph",
+    "risk_graph",
+    "researcher_graph",
+]
