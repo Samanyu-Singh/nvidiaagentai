@@ -14,7 +14,7 @@
 
 - **Frontend:** HTML/CSS/JavaScript
 - **Backend:** Python HTTP Server
-- **AI:** NVIDIA AgentIQ Toolkit (optional)
+- **AI:** NVIDIA AgentIQ Toolkit
 - **Pattern Matching:** Enhanced regex for legal clause detection
 
 ## 🎯 Use Cases
