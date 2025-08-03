@@ -461,31 +461,36 @@ By using our service, you waive all legal rights and agree to these terms.</text
             privacy_best_practices: [/data.*minimization/gi, /purpose.*limitation/gi, /storage.*limitation/gi, /accuracy.*data/gi, /confidentiality.*security/gi, /accountability/gi, /transparency/gi, /user.*consent/gi, /opt.*in.*consent/gi, /granular.*consent/gi]
         };
 
-        // Enhanced risk deductions
+        // Enhanced risk deductions (nuanced scoring for different company types)
         const riskDeductions = {
-            mandatory_arbitration: 25,
-            broad_liability_waivers: 30,
-            broad_termination_rights: 20,
-            automatic_renewal: 15,
-            excessive_data_collection: 25,
-            no_refunds: 10,
-            data_selling: 30,
-            unilateral_changes: 15,
-            sole_discretion_clauses: 15,
-            waiver_of_rights: 20,
-            extensive_data_sharing: 25,
-            indefinite_data_retention: 20,
-            broad_data_use: 20,
-            lack_of_user_control: 25
+            // Major privacy violations (heavily penalized)
+            data_selling: 45,                 // Extremely problematic - selling user data
+            extensive_data_sharing: 40,       // Major privacy concern - sharing with many parties
+            excessive_data_collection: 30,     // Significant concern - but common for personalization
+            broad_data_use: 30,               // Significant concern - but common for services
+            
+            // Standard business practices (moderately penalized)
+            mandatory_arbitration: 12,        // Common for tech companies
+            broad_liability_waivers: 18,      // Standard business practice
+            unilateral_changes: 8,            // Standard practice
+            sole_discretion_clauses: 8,       // Common business practice
+            automatic_renewal: 8,             // Common subscription model
+            
+            // Moderate concerns
+            lack_of_user_control: 25,         // Significant but varies by service
+            indefinite_data_retention: 20,     // Problematic but common
+            waiver_of_rights: 18,             // Concerning but standard
+            broad_termination_rights: 15,     // Reasonable for service providers
+            no_refunds: 6                     // Minor issue
         };
 
-        // Enhanced compliance bonuses
+        // Enhanced compliance bonuses (better recognition of good practices)
         const complianceBonuses = {
-            gdpr: 10,
-            coppa: 10,
-            ccpa: 10,
-            fair_terms: 15,
-            privacy_best_practices: 15
+            gdpr: 18,                    // Important privacy protection
+            coppa: 15,                   // Child protection
+            ccpa: 15,                    // Consumer rights
+            fair_terms: 25,              // Significant positive - transparent practices
+            privacy_best_practices: 25   // Significant positive - privacy-first approach
         };
 
         function findSentenceBoundary(text, position, direction) {

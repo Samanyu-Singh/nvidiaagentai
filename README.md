@@ -57,26 +57,26 @@
 
 - **Base Score:** 100 points
 - **Risk Deductions:**
-  - Broad Liability Waivers: -30
-  - Data Selling: -30
-  - Mandatory Arbitration: -25
-  - Excessive Data Collection: -25
-  - Extensive Data Sharing: -25
-  - Lack of User Control: -25
-  - Waiver of Rights: -20
-  - Broad Termination Rights: -20
-  - Indefinite Data Retention: -20
-  - Broad Data Use: -20
-  - Unilateral Changes: -15
-  - Sole Discretion Clauses: -15
-  - Automatic Renewal: -15
-  - No Refunds: -10
+  - Data Selling: -45 (extremely problematic)
+  - Extensive Data Sharing: -40 (major privacy concern)
+  - Excessive Data Collection: -30 (significant concern)
+  - Broad Data Use: -30 (significant concern)
+  - Lack of User Control: -25 (varies by service)
+  - Indefinite Data Retention: -20 (problematic but common)
+  - Broad Liability Waivers: -18 (standard business practice)
+  - Waiver of Rights: -18 (concerning but standard)
+  - Mandatory Arbitration: -12 (common for tech companies)
+  - Broad Termination Rights: -15 (reasonable for service providers)
+  - Unilateral Changes: -8 (standard practice)
+  - Sole Discretion Clauses: -8 (common business practice)
+  - Automatic Renewal: -8 (common subscription model)
+  - No Refunds: -6 (minor issue)
 - **Compliance Bonuses:**
-  - Fair Terms: +15
-  - Privacy Best Practices: +15
-  - GDPR: +10
-  - CCPA: +10
-  - COPPA: +10
+  - Fair Terms: +25
+  - Privacy Best Practices: +25
+  - GDPR: +18
+  - CCPA: +15
+  - COPPA: +15
 - **Score Ranges:**
   - 80-100: ✅ FAIR
   - 60-79: ⚠️ MODERATE
