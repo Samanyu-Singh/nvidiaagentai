@@ -761,8 +761,12 @@ By using our service, you waive all legal rights and agree to these terms.</text
         }
 
         function analyzeDocument() {
+            console.log('analyzeDocument function called');
             const content = document.getElementById('documentContent').value;
             const title = document.getElementById('documentTitle').value;
+            
+            console.log('Content length:', content.length);
+            console.log('Title:', title);
             
             if (!content.trim()) {
                 alert('Please enter document content');
@@ -779,6 +783,9 @@ By using our service, you waive all legal rights and agree to these terms.</text
                 const compliance = checkCompliance(content);
                 const fairnessScore = calculateFairnessScore(risks, compliance);
                 const recommendations = generateRecommendations(risks, compliance);
+                
+                // Store analysis for chatbot
+                currentAnalysis = { risks, compliance, fairnessScore, recommendations };
                 
                 // Hide loading, show results
                 document.getElementById('loadingSection').classList.add('hidden');
@@ -854,11 +861,25 @@ We believe in fair, transparent terms that protect both users and our business.`
         // Chatbot functionality
         let currentAnalysis = null;
 
+        function formatMessage(content) {
+            // Convert markdown-style formatting to HTML
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold** to <strong>
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')              // *italic* to <em>
+                .replace(/\n/g, '<br>')                            // newlines to <br>
+                .replace(/^- /gm, '• ')                            // dash bullets to bullet points
+                .replace(/^• /gm, '• ');                           // ensure bullet points
+        }
+
         function addMessage(content, isUser = false) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-            messageDiv.innerHTML = `<div class="message-content">${content}</div>`;
+            
+            // Format the content if it's from the bot
+            const formattedContent = isUser ? content : formatMessage(content);
+            messageDiv.innerHTML = `<div class="message-content">${formattedContent}</div>`;
+            
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
@@ -886,507 +907,54 @@ We believe in fair, transparent terms that protect both users and our business.`
             }
         }
 
-        function generateChatbotResponse(userMessage) {
-            const message = userMessage.toLowerCase();
-            
-            // Store current analysis for chatbot context
-            if (currentAnalysis) {
-                const { risks, compliance, fairnessScore, recommendations } = currentAnalysis;
+        async function generateChatbotResponse(userMessage) {
                 const documentContent = document.getElementById('documentContent').value;
                 
-                // Document-specific responses
-                if (message.includes('score') || message.includes('fairness')) {
-                    return `📊 <strong>Fairness Score: ${fairnessScore}/100</strong><br><br>
-                    This score is based on:<br>
-                    • <strong>Risk deductions:</strong> Unfair clauses reduce the score<br>
-                    • <strong>Compliance bonuses:</strong> Good privacy practices increase the score<br><br>
-                    <strong>Score breakdown:</strong>
-                    • 80-100: ✅ FAIR - Good terms and practices
-                    • 60-79: ⚠️ MODERATE - Some concerns but generally acceptable
-                    • 0-59: 🚨 UNFAIR - Significant problems that need addressing<br><br>
-                    <strong>Current analysis found:</strong> ${Object.keys(risks).length} risk categories and ${Object.keys(compliance).length} compliance frameworks.`;
-                }
+            if (!documentContent.trim()) {
+                return `📝 <strong>No document loaded!</strong><br><br>
+                Please upload or paste a document first, then I can answer questions about it.<br><br>
+                You can:<br>
+                • Paste Terms of Service text<br>
+                • Upload a document file<br>
+                • Use the sample documents provided`;
+            }
+            
+            try {
+                // Call the backend API
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        document_content: documentContent
+                    })
+                });
                 
-                if (message.includes('recommend') || message.includes('improve')) {
-                    return `💡 <strong>Recommendations for Improvement:</strong><br><br>
-                    Based on the analysis, here are the key areas to address:<br><br>
-                    ${recommendations.map(rec => `• ${rec}`).join('<br>')}<br><br>
-                    <strong>Priority actions:</strong>
-                    • Address high-risk items first (data selling, arbitration, liability waivers)
-                    • Add missing compliance clauses (GDPR, CCPA)
-                    • Improve user control over data
-                    • Set clear data retention limits`;
-                }
-                
-                // Document-specific questions
-                if (message.includes('what') && message.includes('risks') || message.includes('problems') || message.includes('issues')) {
-                    if (Object.keys(risks).length === 0) {
-                        return `✅ <strong>No major risks detected!</strong><br><br>
-                        The document appears to have fair terms with no significant problematic clauses identified.`;
-                    }
-                    
-                    let response = `🚨 <strong>Risks Found in This Document:</strong><br><br>`;
-                    for (const [riskType, clauses] of Object.entries(risks)) {
-                        const riskName = riskType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        response += `<strong>${riskName}:</strong> ${clauses.length} concerning clause(s)<br>`;
-                        clauses.slice(0, 2).forEach(clause => {
-                            response += `• "${clause.context}"<br>`;
-                        });
-                        response += `<br>`;
-                    }
-                    return response;
-                }
-                
-                if (message.includes('arbitration') || message.includes('arbitrate')) {
-                    if (risks.mandatory_arbitration) {
-                        const clauses = risks.mandatory_arbitration;
-                        let response = `🔍 <strong>Arbitration Issues Found:</strong><br><br>`;
-                        response += `This document contains mandatory arbitration clauses that are concerning:<br><br>`;
-                        clauses.forEach(clause => {
-                            response += `• "${clause.context}"<br><br>`;
-                        });
-                        response += `<strong>Why this is problematic:</strong><br>
-                        • You lose your right to sue in court<br>
-                        • Arbitrators often favor companies<br>
-                        • Limited appeal rights<br>
-                        • Can be more expensive than court`;
-                        return response;
-                    } else {
-                        return `✅ <strong>No Arbitration Issues Found</strong><br><br>
-                        This document does not contain mandatory arbitration clauses, which is good for consumer rights.`;
-                    }
-                }
-                
-                if (message.includes('data') && (message.includes('collect') || message.includes('share') || message.includes('sell'))) {
-                    let response = `📊 <strong>Data Collection Analysis:</strong><br><br>`;
-                    
-                    if (risks.excessive_data_collection) {
-                        response += `🚨 <strong>Excessive Data Collection Found:</strong><br>`;
-                        risks.excessive_data_collection.forEach(clause => {
-                            response += `• "${clause.context}"<br>`;
-                        });
-                        response += `<br>`;
-                    }
-                    
-                    if (risks.data_selling) {
-                        response += `🚨 <strong>Data Selling Found:</strong><br>`;
-                        risks.data_selling.forEach(clause => {
-                            response += `• "${clause.context}"<br>`;
-                        });
-                        response += `<br>`;
-                    }
-                    
-                    if (risks.extensive_data_sharing) {
-                        response += `⚠️ <strong>Extensive Data Sharing Found:</strong><br>`;
-                        risks.extensive_data_sharing.forEach(clause => {
-                            response += `• "${clause.context}"<br>`;
-                        });
-                        response += `<br>`;
-                    }
-                    
-                    if (!risks.excessive_data_collection && !risks.data_selling && !risks.extensive_data_sharing) {
-                        response += `✅ <strong>No major data collection issues found</strong><br><br>
-                        The document appears to have reasonable data collection practices.`;
-                    }
-                    
-                    return response;
-                }
-                
-                if (message.includes('liability') || message.includes('damages')) {
-                    if (risks.broad_liability_waivers) {
-                        const clauses = risks.broad_liability_waivers;
-                        let response = `⚖️ <strong>Liability Issues Found:</strong><br><br>`;
-                        response += `This document contains broad liability waivers:<br><br>`;
-                        clauses.forEach(clause => {
-                            response += `• "${clause.context}"<br><br>`;
-                        });
-                        response += `<strong>Why this is concerning:</strong><br>
-                        • Gives companies complete immunity from damages<br>
-                        • Limits your ability to recover losses<br>
-                        • May be unfair to consumers`;
-                        return response;
-                    } else {
-                        return `✅ <strong>No Major Liability Issues Found</strong><br><br>
-                        This document does not contain overly broad liability waivers.`;
-                    }
-                }
-                
-                if (message.includes('termination') || message.includes('account')) {
-                    if (risks.broad_termination_rights) {
-                        const clauses = risks.broad_termination_rights;
-                        let response = `🚪 <strong>Account Termination Issues Found:</strong><br><br>`;
-                        response += `This document contains concerning termination clauses:<br><br>`;
-                        clauses.forEach(clause => {
-                            response += `• "${clause.context}"<br><br>`;
-                        });
-                        response += `<strong>Why this is problematic:</strong><br>
-                        • Vague standards for termination<br>
-                        • No due process requirements<br>
-                        • Can terminate without clear reasons`;
-                        return response;
-                    } else {
-                        return `✅ <strong>No Major Termination Issues Found</strong><br><br>
-                        This document appears to have reasonable account termination policies.`;
-                    }
-                }
-                
-                if (message.includes('refund') || message.includes('money back')) {
-                    if (risks.no_refunds) {
-                        const clauses = risks.no_refunds;
-                        let response = `💰 <strong>Refund Policy Issues Found:</strong><br><br>`;
-                        response += `This document contains concerning refund policies:<br><br>`;
-                        clauses.forEach(clause => {
-                            response += `• "${clause.context}"<br><br>`;
-                        });
-                        response += `<strong>Why this is problematic:</strong><br>
-                        • No refunds can be unfair to consumers<br>
-                        • May violate consumer protection laws<br>
-                        • Limits your ability to get money back`;
-                        return response;
-                    } else {
-                        return `✅ <strong>No Major Refund Issues Found</strong><br><br>
-                        This document appears to have reasonable refund policies.`;
-                    }
-                }
-                
-                if (message.includes('changes') || message.includes('modify') || message.includes('update')) {
-                    if (risks.unilateral_changes) {
-                        const clauses = risks.unilateral_changes;
-                        let response = `📝 <strong>Change Policy Issues Found:</strong><br><br>`;
-                        response += `This document contains concerning change policies:<br><br>`;
-                        clauses.forEach(clause => {
-                            response += `• "${clause.context}"<br><br>`;
-                        });
-                        response += `<strong>Why this is problematic:</strong><br>
-                        • Can change terms without proper notice<br>
-                        • Unilateral changes are unfair<br>
-                        • May not give you time to opt out`;
-                        return response;
-                    } else {
-                        return `✅ <strong>No Major Change Policy Issues Found</strong><br><br>
-                        This document appears to have reasonable change policies.`;
-                    }
-                }
-                
-                if (message.includes('compliance') || message.includes('gdpr') || message.includes('ccpa')) {
-                    let response = `🛡️ <strong>Compliance Analysis:</strong><br><br>`;
-                    
-                    if (Object.keys(compliance).length === 0) {
-                        response += `❌ <strong>No compliance frameworks detected</strong><br><br>
-                        This document does not appear to have explicit GDPR, CCPA, or other privacy compliance clauses.`;
-                    } else {
-                        response += `✅ <strong>Compliance frameworks found:</strong><br>`;
-                        for (const [framework, clauses] of Object.entries(compliance)) {
-                            const frameworkName = framework.toUpperCase();
-                            response += `• <strong>${frameworkName}:</strong> ${clauses.length} compliance clause(s)<br>`;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                    }
-                    
-                    return response;
-                }
                 
-                if (message.includes('summary') || message.includes('overview')) {
-                    let response = `📋 <strong>Document Summary:</strong><br><br>`;
-                    response += `• <strong>Fairness Score:</strong> ${fairnessScore}/100<br>`;
-                    response += `• <strong>Risk Categories:</strong> ${Object.keys(risks).length}<br>`;
-                    response += `• <strong>Compliance Frameworks:</strong> ${Object.keys(compliance).length}<br><br>`;
-                    
-                    if (Object.keys(risks).length > 0) {
-                        response += `<strong>Main Issues:</strong><br>`;
-                        Object.keys(risks).slice(0, 3).forEach(risk => {
-                            const riskName = risk.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                            response += `• ${riskName}<br>`;
-                        });
-                        response += `<br>`;
-                    }
-                    
-                    if (Object.keys(compliance).length > 0) {
-                        response += `<strong>Compliance:</strong><br>`;
-                        Object.keys(compliance).forEach(framework => {
-                            response += `• ${framework.toUpperCase()}<br>`;
-                        });
-                    }
-                    
-                    return response;
-                }
+                const data = await response.json();
+                return data.response || "I'm sorry, I couldn't generate a response. Please try again.";
                 
-                // Search for specific terms in the document
-                if (message.includes('search') || message.includes('find')) {
-                    const searchTerm = message.replace(/search|find/gi, '').trim();
-                    if (searchTerm.length > 2) {
-                        const searchRegex = new RegExp(searchTerm, 'gi');
-                        const matches = documentContent.match(searchRegex);
-                        
-                        if (matches) {
-                            return `🔍 <strong>Search Results for "${searchTerm}":</strong><br><br>
-                            Found ${matches.length} occurrence(s) in the document.<br><br>
-                            <strong>Context:</strong><br>
-                            The term appears in the document content. You can search for specific phrases to find relevant clauses.`;
-                        } else {
-                            return `🔍 <strong>Search Results for "${searchTerm}":</strong><br><br>
-                            No exact matches found in the document. Try a different search term.`;
-                        }
-                    }
-                }
+            } catch (error) {
+                console.error('Error calling chatbot API:', error);
+                return `🤖 <strong>AI Assistant Error</strong><br><br>
+                I'm having trouble connecting to my AI brain right now. This might be because:<br>
+                • The AI service is temporarily unavailable<br>
+                • There's a network connection issue<br>
+                • The document is too large to process<br><br>
+                <strong>Try:</strong><br>
+                • Refreshing the page<br>
+                • Using a shorter document<br>
+                • Checking your internet connection<br><br>
+                Error details: ${error.message}`;
             }
-            
-            // Comprehensive legal term explanations
-            if (message.includes('arbitration') || message.includes('arbitrate')) {
-                return `🔍 <strong>Arbitration Explained:</strong><br><br>
-                Arbitration is when disputes are settled outside of court by a private arbitrator instead of a judge and jury. <strong>Mandatory arbitration clauses</strong> force you to give up your right to sue in court.<br><br>
-                <strong>Why it's problematic:</strong>
-                • You lose your constitutional right to a jury trial
-                • Arbitrators often favor companies over consumers
-                • Limited appeal rights
-                • Can be more expensive than court
-                • Companies choose the arbitration provider<br><br>
-                <strong>Real examples:</strong>
-                • TikTok: "Any dispute...shall be resolved by binding arbitration"
-                • Spotify: "THESE TERMS CONTAIN A MANDATORY ARBITRATION PROVISION"
-                • Uber: "You and Uber agree to resolve any disputes through binding arbitration"<br><br>
-                <strong>Your rights:</strong> Some states allow you to opt out of arbitration clauses. Check your local consumer protection laws.`;
-            }
-            
-            if (message.includes('liability') || message.includes('damages')) {
-                return `⚖️ <strong>Liability Waivers Explained:</strong><br><br>
-                Liability waivers protect companies from being sued for damages, even when they're at fault. <strong>Broad liability waivers</strong> can be unfair because they give companies complete immunity.<br><br>
-                <strong>What to watch for:</strong>
-                • "As is" and "as available" disclaimers
-                • "No liability for damages" clauses
-                • "Disclaim all warranties" language
-                • Limits on consequential damages
-                • "Not responsible for any losses"<br><br>
-                <strong>Real examples:</strong>
-                • Facebook: "We provide the Service 'as is' without any warranties"
-                • Instagram: "We are not liable for any indirect, incidental, special, consequential, or punitive damages"
-                • Twitter: "We disclaim all warranties...to the fullest extent permitted by law"<br><br>
-                <strong>Fair terms should:</strong> Allow reasonable liability while protecting against frivolous lawsuits.`;
-            }
-            
-            if (message.includes('data') && (message.includes('collect') || message.includes('share') || message.includes('sell'))) {
-                return `📊 <strong>Data Collection & Sharing:</strong><br><br>
-                Companies collect various types of data about you. <strong>Excessive data collection</strong> goes beyond what's necessary to provide the service.<br><br>
-                <strong>Red flags:</strong>
-                • Collecting biometric data (fingerprints, face scans)
-                • Tracking across multiple websites
-                • Sharing with third parties for advertising
-                • Collecting precise location data
-                • Selling data to advertisers
-                • Collecting keystroke patterns
-                • Accessing clipboard information<br><br>
-                <strong>Real examples:</strong>
-                • TikTok: Collects "biometric identifiers," "keystroke patterns," "clipboard information"
-                • Facebook: Tracks you across websites with "pixel" technology
-                • Google: Collects location data even when apps are closed
-                • Instagram: Uses your photos to train AI algorithms<br><br>
-                <strong>Your rights:</strong> GDPR (EU) and CCPA (California) give you rights to know what data is collected, request deletion, and opt out of data selling.`;
-            }
-            
-            if (message.includes('privacy') || message.includes('gdpr') || message.includes('ccpa')) {
-                return `🛡️ <strong>Privacy Rights & Compliance:</strong><br><br>
-                <strong>GDPR (EU):</strong> Right to know what data is collected, request deletion, data portability, and explicit consent.<br><br>
-                <strong>CCPA (California):</strong> Right to know what personal information is collected, opt out of data selling, and request deletion.<br><br>
-                <strong>Fair privacy practices:</strong>
-                • Data minimization (only collect what's necessary)
-                • Purpose limitation (use data only for stated purposes)
-                • Storage limitation (don't keep data forever)
-                • User control (ability to delete account/data)
-                • Transparency (clear privacy policies)<br><br>
-                <strong>Real examples:</strong>
-                • Apple: Strong privacy stance, minimal data collection
-                • DuckDuckGo: No tracking, no personal data collection
-                • Signal: End-to-end encryption, no data collection`;
-            }
-            
-            if (message.includes('termination') || message.includes('account')) {
-                return `🚪 <strong>Account Termination Rights:</strong><br><br>
-                <strong>Fair termination policies should:</strong>
-                • Give reasonable notice before termination
-                • Provide clear reasons for termination
-                • Allow appeal process
-                • Not terminate without cause<br><br>
-                <strong>Red flags:</strong>
-                • "Terminate at any time without notice"
-                • "Sole discretion" without objective standards
-                • Vague violation standards
-                • No appeal process<br><br>
-                <strong>Real examples:</strong>
-                • Twitter: Can suspend accounts for "violation of terms"
-                • YouTube: Can terminate channels for "repeated violations"
-                • Instagram: Can disable accounts "at any time"<br><br>
-                <strong>Your rights:</strong> You should have due process and clear standards for account termination.`;
-            }
-            
-            // Platform-specific information
-            if (message.includes('tiktok') || message.includes('bytedance')) {
-                return `📱 <strong>TikTok Privacy & Terms Analysis:</strong><br><br>
-                <strong>Major concerns with TikTok:</strong><br>
-                • <strong>Data collection:</strong> Biometric data, keystroke patterns, clipboard info, precise location<br>
-                • <strong>Data sharing:</strong> Shares with ByteDance, Chinese government access concerns<br>
-                • <strong>Arbitration:</strong> Mandatory arbitration for all disputes<br>
-                • <strong>Content ownership:</strong> You grant TikTok "perpetual, irrevocable" rights to your content<br>
-                • <strong>AI training:</strong> Uses your content to train AI algorithms<br><br>
-                <strong>Privacy risks:</strong>
-                • Collects more data than necessary for video sharing
-                • Tracks across other apps and websites
-                • Shares data with parent company ByteDance
-                • Potential Chinese government access<br><br>
-                <strong>Your rights:</strong> You can request data deletion, but TikTok retains broad rights to your content.`;
-            }
-            
-            if (message.includes('facebook') || message.includes('meta')) {
-                return `📘 <strong>Facebook/Meta Privacy & Terms Analysis:</strong><br><br>
-                <strong>Major concerns with Facebook:</strong><br>
-                • <strong>Data collection:</strong> Tracks across websites, collects biometric data, location<br>
-                • <strong>Data sharing:</strong> Shares with advertisers, business partners, third parties<br>
-                • <strong>Arbitration:</strong> Mandatory arbitration for most disputes<br>
-                • <strong>Content rights:</strong> You grant Facebook broad rights to use your content<br>
-                • <strong>AI training:</strong> Uses your posts and photos to train AI<br><br>
-                <strong>Privacy risks:</strong>
-                • Tracks you across the internet with "pixel" technology
-                • Collects data from other apps and websites
-                • Shares data with thousands of advertisers
-                • Uses facial recognition without clear consent<br><br>
-                <strong>Your rights:</strong> You can download your data and delete your account, but Facebook retains broad usage rights.`;
-            }
-            
-            if (message.includes('google') || message.includes('alphabet')) {
-                return `🔍 <strong>Google Privacy & Terms Analysis:</strong><br><br>
-                <strong>Major concerns with Google:</strong><br>
-                • <strong>Data collection:</strong> Tracks across all Google services, location history, search history<br>
-                • <strong>Data sharing:</strong> Shares data across Google services, with advertisers<br>
-                • <strong>Arbitration:</strong> Mandatory arbitration for most disputes<br>
-                • <strong>AI training:</strong> Uses your data to train AI models<br>
-                • <strong>Location tracking:</strong> Tracks location even when apps are closed<br><br>
-                <strong>Privacy risks:</strong>
-                • Collects data from Gmail, Maps, Search, YouTube, Chrome
-                • Tracks location history across devices
-                • Uses data for targeted advertising
-                • Shares data across all Google services<br><br>
-                <strong>Your rights:</strong> You can download your data, but Google retains broad rights to use it for AI training and advertising.`;
-            }
-            
-            if (message.includes('apple')) {
-                return `🍎 <strong>Apple Privacy & Terms Analysis:</strong><br><br>
-                <strong>Apple's privacy stance:</strong><br>
-                • <strong>Data minimization:</strong> Collects minimal data necessary for services<br>
-                • <strong>On-device processing:</strong> Many features process data on your device<br>
-                • <strong>No data selling:</strong> Doesn't sell personal information to third parties<br>
-                • <strong>Transparency:</strong> Clear privacy labels and data usage explanations<br>
-                • <strong>User control:</strong> Strong account deletion and data export options<br><br>
-                <strong>Privacy strengths:</strong>
-                • App Tracking Transparency (ATT) framework
-                • Privacy-focused advertising (no personal data shared)
-                • End-to-end encryption for iMessage and FaceTime
-                • Minimal data collection compared to competitors<br><br>
-                <strong>Your rights:</strong> Strong privacy protections, but some data still collected for services.`;
-            }
-            
-            // Legal rights and consumer protection
-            if (message.includes('rights') || message.includes('consumer')) {
-                return `⚖️ <strong>Your Consumer Rights:</strong><br><br>
-                <strong>Federal Rights (USA):</strong><br>
-                • Right to know what data is collected about you
-                • Right to dispute billing errors
-                • Right to cancel services with proper notice
-                • Right to sue for fraud or personal injury
-                • Right to opt out of telemarketing<br><br>
-                <strong>State Rights:</strong><br>
-                • <strong>California (CCPA):</strong> Right to know, delete, and opt out of data selling
-                • <strong>Virginia (CDPA):</strong> Similar rights to California
-                • <strong>Colorado (CPA):</strong> Consumer privacy rights
-                • <strong>Connecticut (CTDPA):</strong> Privacy protections<br><br>
-                <strong>How to exercise your rights:</strong>
-                • Contact companies directly
-                • Use privacy request forms
-                • File complaints with state attorneys general
-                • Consider legal action for serious violations`;
-            }
-            
-            if (message.includes('delete') || message.includes('remove')) {
-                return `🗑️ <strong>How to Delete Your Data:</strong><br><br>
-                <strong>Account Deletion:</strong><br>
-                • <strong>Facebook:</strong> Settings > Your Facebook Information > Deactivation and Deletion
-                • <strong>Instagram:</strong> Settings > Account > Delete Account
-                • <strong>Twitter:</strong> Settings > Your Account > Deactivate Account
-                • <strong>TikTok:</strong> Profile > Settings > Privacy > Delete Account
-                • <strong>Google:</strong> myaccount.google.com > Data & Privacy > Delete Account<br><br>
-                <strong>Data Download:</strong><br>
-                • Most platforms allow you to download your data before deletion
-                • Look for "Download Your Data" or "Data Export" options
-                • This gives you a copy of everything they have about you<br><br>
-                <strong>Important notes:</strong>
-                • Some data may be retained for legal reasons
-                • Deletion may take 30-90 days to complete
-                • You may lose access to purchased content
-                • Consider downloading data first`;
-            }
-            
-            if (message.includes('opt out') || message.includes('tracking')) {
-                return `🚫 <strong>How to Opt Out of Tracking:</strong><br><br>
-                <strong>Browser Settings:</strong><br>
-                • Enable "Do Not Track" in your browser
-                • Block third-party cookies
-                • Use privacy-focused browsers (Brave, Firefox)
-                • Install ad blockers and tracking blockers<br><br>
-                <strong>Platform Settings:</strong><br>
-                • <strong>Facebook:</strong> Settings > Privacy > Limit data sharing
-                • <strong>Google:</strong> myaccount.google.com > Data & Privacy > Ad personalization
-                • <strong>Apple:</strong> Settings > Privacy > Tracking > Ask App Not to Track<br><br>
-                <strong>Mobile Settings:</strong><br>
-                • Disable location tracking for apps
-                • Limit ad tracking on iOS
-                • Use app permissions carefully
-                • Consider using privacy-focused apps<br><br>
-                <strong>Additional steps:</strong>
-                • Use VPN services
-                • Consider privacy-focused alternatives
-                • Regularly review and update privacy settings`;
-            }
-            
-            // General legal help
-            if (message.includes('help') || message.includes('what can you do')) {
-                return `🤖 <strong>I can help you with:</strong><br><br>
-                <strong>📱 Platform Analysis:</strong>
-                • TikTok, Facebook, Google, Apple, and other major platforms
-                • Privacy policies and terms of service analysis
-                • Data collection and sharing practices<br><br>
-                <strong>⚖️ Legal Terms:</strong>
-                • Arbitration clauses and your rights
-                • Liability waivers and damages
-                • Data collection and privacy rights
-                • Account termination policies<br><br>
-                <strong>🛡️ Privacy Rights:</strong>
-                • GDPR (EU) and CCPA (California) rights
-                • How to delete your data
-                • How to opt out of tracking
-                • Consumer protection laws<br><br>
-                <strong>💡 Practical Help:</strong>
-                • Step-by-step deletion guides
-                • Privacy setting recommendations
-                • Alternative privacy-focused services
-                • Legal rights and remedies<br><br>
-                <strong>Try asking:</strong> "Tell me about TikTok's privacy", "How do I delete my Facebook data?", "What are my CCPA rights?", "How to opt out of tracking?"`;
-            }
-            
-            if (message.includes('hello') || message.includes('hi')) {
-                return `👋 Hello! I'm your comprehensive legal assistant. I can help you with:<br><br>
-                • <strong>Platform analysis:</strong> TikTok, Facebook, Google, Apple, and more<br>
-                • <strong>Privacy rights:</strong> GDPR, CCPA, and consumer protection<br>
-                • <strong>Legal terms:</strong> Arbitration, liability, data collection<br>
-                • <strong>Practical help:</strong> How to delete data, opt out of tracking<br><br>
-                What would you like to know about?`;
-            }
-            
-            return `🤔 I'm not sure I understand. Try asking about:<br><br>
-            <strong>📱 Platforms:</strong> "Tell me about TikTok's privacy", "Facebook data collection", "Google tracking"<br>
-            <strong>⚖️ Legal Terms:</strong> "What is arbitration?", "Explain liability waivers", "Data collection rights"<br>
-            <strong>🛡️ Privacy:</strong> "How to delete my data?", "CCPA rights", "Opt out of tracking"<br>
-            <strong>💡 Help:</strong> "What can you do?", "Consumer rights", "Privacy tips"<br><br>
-            Or type "help" for a full list of topics I can assist with!`;
         }
 
-        function handleChatMessage() {
+        async function handleChatMessage() {
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             
@@ -1399,49 +967,28 @@ We believe in fair, transparent terms that protect both users and our business.`
             // Show typing indicator
             addTypingIndicator();
             
-            // Generate response after a short delay
-            setTimeout(() => {
+            try {
+                // Generate response using the AI
+                const response = await generateChatbotResponse(message);
                 removeTypingIndicator();
-                const response = generateChatbotResponse(message);
                 addMessage(response);
-            }, 1000 + Math.random() * 1000); // Random delay for natural feel
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`🤖 <strong>Error:</strong> ${error.message}`);
+            }
         }
 
-        // Update analyzeDocument to store analysis for chatbot
-        function analyzeDocument() {
-            const content = document.getElementById('documentContent').value;
-            const title = document.getElementById('documentTitle').value;
-            
-            if (!content.trim()) {
-                alert('Please enter document content');
-                return;
-            }
-            
-            // Show loading
-            document.getElementById('loadingSection').classList.remove('hidden');
-            document.getElementById('resultsSection').classList.add('hidden');
-            
-            // Simulate processing time
-            setTimeout(() => {
-                const risks = detectRisks(content);
-                const compliance = checkCompliance(content);
-                const fairnessScore = calculateFairnessScore(risks, compliance);
-                const recommendations = generateRecommendations(risks, compliance);
-                
-                // Store analysis for chatbot
-                currentAnalysis = { risks, compliance, fairnessScore, recommendations };
-                
-                // Hide loading, show results
-                document.getElementById('loadingSection').classList.add('hidden');
-                document.getElementById('resultsSection').classList.remove('hidden');
-                
-                displayResults(risks, compliance, fairnessScore, recommendations);
-            }, 2000);
-        }
+        // Update the first analyzeDocument function to store analysis for chatbot
 
         // Event listeners
-        document.getElementById('analysisForm').addEventListener('submit', function(e) {
+        console.log('Setting up event listeners...');
+        const analysisForm = document.getElementById('analysisForm');
+        console.log('Analysis form found:', analysisForm);
+        
+        analysisForm.addEventListener('submit', function(e) {
+            console.log('Form submitted!');
             e.preventDefault();
+            console.log('Prevented default, calling analyzeDocument...');
             analyzeDocument();
         });
 
@@ -1454,6 +1001,7 @@ We believe in fair, transparent terms that protect both users and our business.`
         });
 
         // Initialize with sample document
+        console.log('JavaScript loaded successfully');
         loadSampleDocument();
     </script>
 </body>
