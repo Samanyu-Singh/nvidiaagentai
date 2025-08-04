@@ -317,14 +317,6 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
         "lack_of_user_control": 25,  # Major deduction for lack of control
     }
 
-    # Compliance bonuses
-    compliance_bonuses = {
-        "gdpr": 10,
-        "coppa": 10,
-        "ccpa": 10,
-        "fair_terms": 15,
-        "privacy_best_practices": 15,
-
     # Risk deductions (FINAL FINE-TUNED - get Spotify to MODERATE, keep others as is)
     risk_deductions = {
         "mandatory_arbitration": 8,  # Common practice, minor deduction
