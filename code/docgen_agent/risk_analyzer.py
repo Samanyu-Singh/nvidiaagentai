@@ -16,7 +16,8 @@ from .models import LegalDocument
 
 _LOGGER = logging.getLogger(__name__)
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
+
 
 class RiskAnalyzerState(BaseModel):
     document: LegalDocument
@@ -25,6 +26,7 @@ class RiskAnalyzerState(BaseModel):
     fairness_score: int = 0
     recommendations: list[str] = []
     messages: Annotated[Sequence[Any], add_messages] = []
+
 
 # Enhanced risk patterns to catch sophisticated unfair terms
 RISK_PATTERNS = {
@@ -37,7 +39,7 @@ RISK_PATTERNS = {
         r"arbitration.*rules.*procedures",
         r"judgment.*award.*court",
         r"no.*right.*sue.*court",
-        r"waive.*right.*jury.*trial"
+        r"waive.*right.*jury.*trial",
     ],
     "broad_liability_waivers": [
         r"no.*liability.*damages",
@@ -51,7 +53,7 @@ RISK_PATTERNS = {
         r"exemplary.*damages",
         r"lost.*profits.*data",
         r"business.*reputation",
-        r"intangible.*loss"
+        r"intangible.*loss",
     ],
     "broad_termination_rights": [
         r"terminate.*account.*without.*notice",
@@ -61,7 +63,7 @@ RISK_PATTERNS = {
         r"infringement.*rights.*terminate",
         r"applicable.*laws.*terminate",
         r"might.*constitute.*violation",
-        r"would.*constitute.*violation"
+        r"would.*constitute.*violation",
     ],
     "automatic_renewal": [
         r"automatically.*renew",
@@ -69,7 +71,7 @@ RISK_PATTERNS = {
         r"renew.*end.*period",
         r"unless.*cancel.*before",
         r"recurring.*subscription",
-        r"continuous.*billing"
+        r"continuous.*billing",
     ],
     "excessive_data_collection": [
         r"location.*data",
@@ -91,14 +93,14 @@ RISK_PATTERNS = {
         r"metadata.*upload",
         r"device.*identifiers",
         r"advertising.*identifiers",
-        r"IP.*address.*geolocation"
+        r"IP.*address.*geolocation",
     ],
     "no_refunds": [
         r"no.*refunds",
         r"non.*refundable",
         r"all.*sales.*final",
         r"no.*money.*back",
-        r"subscription.*non.*refundable"
+        r"subscription.*non.*refundable",
     ],
     "data_selling": [
         r"sell.*personal.*information",
@@ -110,7 +112,7 @@ RISK_PATTERNS = {
         r"business.*partners.*share",
         r"cross.*context.*behavioral.*advertising",
         r"targeted.*advertising",
-        r"personalized.*advertising"
+        r"personalized.*advertising",
     ],
     "unilateral_changes": [
         r"change.*terms.*any.*time",
@@ -118,21 +120,21 @@ RISK_PATTERNS = {
         r"update.*terms.*discretion",
         r"reserve.*right.*change",
         r"alter.*replace.*modify",
-        r"update.*privacy.*policy.*time"
+        r"update.*privacy.*policy.*time",
     ],
     "sole_discretion_clauses": [
         r"sole.*discretion",
         r"our.*discretion",
         r"company.*discretion",
         r"reasonable.*discretion",
-        r"appropriate.*circumstances"
+        r"appropriate.*circumstances",
     ],
     "waiver_of_rights": [
         r"waive.*all.*rights",
         r"waive.*legal.*rights",
         r"waive.*claims",
         r"irrevocably.*waive",
-        r"waive.*any.*claim"
+        r"waive.*any.*claim",
     ],
     "extensive_data_sharing": [
         r"share.*with.*service.*providers",
@@ -144,7 +146,7 @@ RISK_PATTERNS = {
         r"global.*company",
         r"international.*transfer",
         r"cross.*border.*transfer",
-        r"servers.*outside.*united.*states"
+        r"servers.*outside.*united.*states",
     ],
     "indefinite_data_retention": [
         r"retain.*as.*long.*necessary",
@@ -156,7 +158,7 @@ RISK_PATTERNS = {
         r"retain.*violation.*terms",
         r"keep.*information.*violation",
         r"retention.*different.*criteria",
-        r"keep.*account.*long.*account"
+        r"keep.*account.*long.*account",
     ],
     "broad_data_use": [
         r"use.*advertising.*marketing",
@@ -170,7 +172,7 @@ RISK_PATTERNS = {
         r"use.*AI.*training",
         r"use.*algorithm.*improvement",
         r"use.*research.*purposes",
-        r"use.*analytics.*measurement"
+        r"use.*analytics.*measurement",
     ],
     "lack_of_user_control": [
         r"no.*opt.*out.*data.*collection",
@@ -182,8 +184,8 @@ RISK_PATTERNS = {
         r"cannot.*delete.*account",
         r"cannot.*remove.*data",
         r"limited.*data.*deletion",
-        r"partial.*data.*removal"
-    ]
+        r"partial.*data.*removal",
+    ],
 }
 
 # Enhanced compliance patterns
@@ -198,7 +200,7 @@ COMPLIANCE_PATTERNS = {
         r"personal.*data.*rights",
         r"lawful.*basis.*processing",
         r"data.*subject.*rights",
-        r"privacy.*by.*design"
+        r"privacy.*by.*design",
     ],
     "coppa": [
         r"children.*under.*13",
@@ -208,7 +210,7 @@ COMPLIANCE_PATTERNS = {
         r"minor.*protection",
         r"children.*privacy.*policy",
         r"guardian.*guide",
-        r"parent.*controls"
+        r"parent.*controls",
     ],
     "ccpa": [
         r"california.*privacy",
@@ -218,7 +220,7 @@ COMPLIANCE_PATTERNS = {
         r"privacy.*rights.*act",
         r"california.*resident",
         r"personal.*information.*request",
-        r"data.*access.*request"
+        r"data.*access.*request",
     ],
     "fair_terms": [
         r"reasonable.*notice",
@@ -230,7 +232,7 @@ COMPLIANCE_PATTERNS = {
         r"user.*control",
         r"data.*minimization",
         r"purpose.*limitation",
-        r"storage.*limitation"
+        r"storage.*limitation",
     ],
     "privacy_best_practices": [
         r"data.*minimization",
@@ -242,15 +244,16 @@ COMPLIANCE_PATTERNS = {
         r"transparency",
         r"user.*consent",
         r"opt.*in.*consent",
-        r"granular.*consent"
-    ]
+        r"granular.*consent",
+    ],
 }
+
 
 def detect_risk_patterns(content: str) -> dict:
     """Detect risk patterns in legal document content."""
     risks = {}
     content_lower = content.lower()
-    
+
     for risk_type, patterns in RISK_PATTERNS.items():
         found_clauses = []
         for pattern in patterns:
@@ -259,22 +262,21 @@ def detect_risk_patterns(content: str) -> dict:
                 start = max(0, match.start() - 100)
                 end = min(len(content), match.end() + 100)
                 context = content[start:end].strip()
-                found_clauses.append({
-                    "pattern": pattern,
-                    "match": match.group(),
-                    "context": context
-                })
-        
+                found_clauses.append(
+                    {"pattern": pattern, "match": match.group(), "context": context}
+                )
+
         if found_clauses:
             risks[risk_type] = found_clauses
-    
+
     return risks
+
 
 def check_compliance(content: str) -> dict:
     """Check compliance with legal frameworks."""
     compliance = {}
     content_lower = content.lower()
-    
+
     for framework, patterns in COMPLIANCE_PATTERNS.items():
         found_clauses = []
         for pattern in patterns:
@@ -283,21 +285,20 @@ def check_compliance(content: str) -> dict:
                 start = max(0, match.start() - 50)
                 end = min(len(content), match.end() + 50)
                 context = content[start:end].strip()
-                found_clauses.append({
-                    "pattern": pattern,
-                    "match": match.group(),
-                    "context": context
-                })
-        
+                found_clauses.append(
+                    {"pattern": pattern, "match": match.group(), "context": context}
+                )
+
         if found_clauses:
             compliance[framework] = found_clauses
-    
+
     return compliance
+
 
 def calculate_fairness_score(risks: dict, compliance: dict) -> int:
     """Calculate fairness score based on risks and compliance."""
     base_score = 100
-    
+
     # Risk deductions (enhanced for sophisticated unfair terms)
     risk_deductions = {
         "mandatory_arbitration": 25,  # Major deduction for arbitration
@@ -313,122 +314,157 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
         "extensive_data_sharing": 25,  # Major deduction for extensive sharing
         "indefinite_data_retention": 20,  # Significant deduction
         "broad_data_use": 20,  # Significant deduction
-        "lack_of_user_control": 25  # Major deduction for lack of control
+        "lack_of_user_control": 25,  # Major deduction for lack of control
     }
-    
+
     # Compliance bonuses
     compliance_bonuses = {
         "gdpr": 10,
         "coppa": 10,
         "ccpa": 10,
         "fair_terms": 15,
-        "privacy_best_practices": 15
+        "privacy_best_practices": 15,
     }
-    
+
     # Apply risk deductions
     for risk_type, clauses in risks.items():
         if risk_type in risk_deductions:
             deduction = risk_deductions[risk_type]
             base_score -= deduction
-            _LOGGER.info(f"Risk deduction for {risk_type}: -{deduction} points ({len(clauses)} clauses)")
-    
+            _LOGGER.info(
+                f"Risk deduction for {risk_type}: -{deduction} points ({len(clauses)} clauses)"
+            )
+
     # Apply compliance bonuses
     for framework, clauses in compliance.items():
         if framework in compliance_bonuses:
             bonus = compliance_bonuses[framework]
             base_score += bonus
-            _LOGGER.info(f"Compliance bonus for {framework}: +{bonus} points ({len(clauses)} clauses)")
-    
+            _LOGGER.info(
+                f"Compliance bonus for {framework}: +{bonus} points ({len(clauses)} clauses)"
+            )
+
     # Ensure score is between 0 and 100
     return max(0, min(100, base_score))
+
 
 def generate_recommendations(risks: dict, compliance: dict) -> list[str]:
     """Generate recommendations based on detected risks and compliance."""
     recommendations = []
-    
+
     if "mandatory_arbitration" in risks:
-        recommendations.append("⚠️ Remove mandatory arbitration clause - users should have right to sue in court")
-    
+        recommendations.append(
+            "⚠️ Remove mandatory arbitration clause - users should have right to sue in court"
+        )
+
     if "broad_liability_waivers" in risks:
-        recommendations.append("⚠️ Limit liability waivers - complete immunity is unfair to users")
-    
+        recommendations.append(
+            "⚠️ Limit liability waivers - complete immunity is unfair to users"
+        )
+
     if "broad_termination_rights" in risks:
-        recommendations.append("⚠️ Add due process for account termination - vague standards are unfair")
-    
+        recommendations.append(
+            "⚠️ Add due process for account termination - vague standards are unfair"
+        )
+
     if "automatic_renewal" in risks:
-        recommendations.append("⚠️ Make subscription cancellation easier - automatic renewal can be deceptive")
-    
+        recommendations.append(
+            "⚠️ Make subscription cancellation easier - automatic renewal can be deceptive"
+        )
+
     if "excessive_data_collection" in risks:
-        recommendations.append("🚨 Limit data collection to what's necessary - excessive collection violates privacy")
-    
+        recommendations.append(
+            "🚨 Limit data collection to what's necessary - excessive collection violates privacy"
+        )
+
     if "no_refunds" in risks:
-        recommendations.append("⚠️ Provide clear refund policies - no-refund policies can be unfair")
-    
+        recommendations.append(
+            "⚠️ Provide clear refund policies - no-refund policies can be unfair"
+        )
+
     if "data_selling" in risks:
-        recommendations.append("🚨 Prohibit selling user data - this violates user trust and privacy")
-    
+        recommendations.append(
+            "🚨 Prohibit selling user data - this violates user trust and privacy"
+        )
+
     if "unilateral_changes" in risks:
-        recommendations.append("⚠️ Require notice for material changes - unilateral changes are unfair")
-    
+        recommendations.append(
+            "⚠️ Require notice for material changes - unilateral changes are unfair"
+        )
+
     if "sole_discretion_clauses" in risks:
-        recommendations.append("⚠️ Add objective standards - 'sole discretion' is too vague")
-    
+        recommendations.append(
+            "⚠️ Add objective standards - 'sole discretion' is too vague"
+        )
+
     if "waiver_of_rights" in risks:
-        recommendations.append("🚨 Remove broad rights waivers - users should retain basic legal rights")
-    
+        recommendations.append(
+            "🚨 Remove broad rights waivers - users should retain basic legal rights"
+        )
+
     if "extensive_data_sharing" in risks:
-        recommendations.append("🚨 Limit data sharing - extensive sharing with third parties violates privacy")
-    
+        recommendations.append(
+            "🚨 Limit data sharing - extensive sharing with third parties violates privacy"
+        )
+
     if "indefinite_data_retention" in risks:
-        recommendations.append("⚠️ Set clear data retention limits - indefinite retention is unfair")
-    
+        recommendations.append(
+            "⚠️ Set clear data retention limits - indefinite retention is unfair"
+        )
+
     if "broad_data_use" in risks:
-        recommendations.append("⚠️ Limit data use to stated purposes - broad use violates user expectations")
-    
+        recommendations.append(
+            "⚠️ Limit data use to stated purposes - broad use violates user expectations"
+        )
+
     if "lack_of_user_control" in risks:
-        recommendations.append("🚨 Give users control over their data - lack of control is unfair")
-    
+        recommendations.append(
+            "🚨 Give users control over their data - lack of control is unfair"
+        )
+
     # Add compliance recommendations
     if "gdpr" not in compliance:
         recommendations.append("📋 Add GDPR compliance clauses for EU users")
-    
+
     if "ccpa" not in compliance:
         recommendations.append("📋 Add CCPA compliance for California users")
-    
+
     if "fair_terms" not in compliance:
         recommendations.append("📋 Add fair dispute resolution process")
-    
+
     if "privacy_best_practices" not in compliance:
         recommendations.append("📋 Implement privacy by design principles")
-    
+
     if not recommendations:
         recommendations.append("✅ Document appears to have fair terms")
-    
+
     return recommendations
+
 
 def analyze_legal_risks(state: RiskAnalyzerState, config: RunnableConfig):
     """Analyze legal risks in the document."""
     content = state.document.content.lower()
-    
+
     # Detect risks
     risks = detect_risk_patterns(state.document.content)
-    
+
     # Check compliance
     compliance = check_compliance(state.document.content)
-    
+
     # Calculate fairness score
     fairness_score = calculate_fairness_score(risks, compliance)
-    
+
     # Generate recommendations
     recommendations = generate_recommendations(risks, compliance)
-    
+
     return {
         "risk_analysis": risks,
         "compliance_check": compliance,
         "fairness_score": fairness_score,
         "recommendations": recommendations,
-        "messages": state.messages
+        "messages": state.messages,
     }
+
 
 def create_graph():
     """Create the risk analyzer workflow."""
@@ -438,4 +474,5 @@ def create_graph():
     workflow.add_edge("analyze_legal_risks", END)
     return workflow.compile()
 
-graph = create_graph() 
+
+graph = create_graph()

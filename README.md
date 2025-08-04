@@ -9,13 +9,15 @@
 - **Interactive Chatbot:** Ask questions about specific documents
 - **Real-time Analysis:** Instant results with detailed explanations
 - **Privacy Rights Guidance:** GDPR, CCPA, and consumer protection
+- **Document Analysis:** Comprehensive legal document parsing and analysis
 
 ## 🛠️ Technology Stack
 
 - **Frontend:** HTML/CSS/JavaScript
 - **Backend:** Python HTTP Server
-- **AI:** NVIDIA AgentIQ Toolkit
+- **AI:** NVIDIA AI Endpoints (Llama 3.1 8B)
 - **Pattern Matching:** Enhanced regex for legal clause detection
+- **Document Processing:** PDF parsing and text extraction
 
 ## 🎯 Use Cases
 
@@ -37,10 +39,10 @@
    pip install -r requirements.txt
    ```
 
-3. **Set up API keys (optional for LLM features):**
+3. **Set up NVIDIA API key:**
    ```bash
    cp secrets.env.example secrets.env
-   # Edit secrets.env with your API keys (do NOT commit this file)
+   # Edit secrets.env with your NVIDIA API key (do NOT commit this file)
    ```
 
 4. **Run the web server:**
@@ -50,7 +52,7 @@
 
 5. **Open in browser:**
    ```
-   http://localhost:8000
+   http://localhost:8081
    ```
 
 ## 📊 How the Fairness Score Works
@@ -88,7 +90,7 @@ MIT License - see LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-- Built with NVIDIA's AgentIQ Toolkit
+- Built with NVIDIA's AI Endpoints
 - Inspired by consumer protection needs
 - Designed for hackathon demonstration
 
