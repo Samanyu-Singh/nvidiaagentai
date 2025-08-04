@@ -16,7 +16,8 @@ from .models import LegalDocument
 
 _LOGGER = logging.getLogger(__name__)
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
+
 
 
 class RiskAnalyzerState(BaseModel):
@@ -299,6 +300,33 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
     """Calculate fairness score based on risks and compliance."""
     base_score = 100
 
+<<<<<<< main
+    # Risk deductions (enhanced for sophisticated unfair terms)
+    risk_deductions = {
+        "mandatory_arbitration": 25,  # Major deduction for arbitration
+        "broad_liability_waivers": 30,  # Major deduction for liability waivers
+        "broad_termination_rights": 20,  # Significant deduction
+        "automatic_renewal": 15,  # Moderate deduction
+        "excessive_data_collection": 25,  # Major deduction for privacy violations
+        "no_refunds": 10,  # Minor deduction
+        "data_selling": 30,  # Major deduction for data selling
+        "unilateral_changes": 15,  # Moderate deduction
+        "sole_discretion_clauses": 15,  # Moderate deduction
+        "waiver_of_rights": 20,  # Significant deduction
+        "extensive_data_sharing": 25,  # Major deduction for extensive sharing
+        "indefinite_data_retention": 20,  # Significant deduction
+        "broad_data_use": 20,  # Significant deduction
+        "lack_of_user_control": 25,  # Major deduction for lack of control
+    }
+
+    # Compliance bonuses
+    compliance_bonuses = {
+        "gdpr": 10,
+        "coppa": 10,
+        "ccpa": 10,
+        "fair_terms": 15,
+        "privacy_best_practices": 15,
+=======
     # Risk deductions (FINAL FINE-TUNED - get Spotify to MODERATE, keep others as is)
     risk_deductions = {
         "mandatory_arbitration": 8,  # Common practice, minor deduction
@@ -324,6 +352,7 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
         "ccpa": 10,  # Increased from 8
         "fair_terms": 15,  # Increased from 12
         "privacy_best_practices": 15,  # Increased from 12
+>>>>>>> main
     }
 
     # Apply risk deductions
