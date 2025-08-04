@@ -19,7 +19,6 @@ _LOGGER = logging.getLogger(__name__)
 llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
 
 
-
 class RiskAnalyzerState(BaseModel):
     document: LegalDocument
     risk_analysis: dict = {}
@@ -300,7 +299,6 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
     """Calculate fairness score based on risks and compliance."""
     base_score = 100
 
-<<<<<<< main
     # Risk deductions (enhanced for sophisticated unfair terms)
     risk_deductions = {
         "mandatory_arbitration": 25,  # Major deduction for arbitration
@@ -326,7 +324,7 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
         "ccpa": 10,
         "fair_terms": 15,
         "privacy_best_practices": 15,
-=======
+
     # Risk deductions (FINAL FINE-TUNED - get Spotify to MODERATE, keep others as is)
     risk_deductions = {
         "mandatory_arbitration": 8,  # Common practice, minor deduction
@@ -352,7 +350,6 @@ def calculate_fairness_score(risks: dict, compliance: dict) -> int:
         "ccpa": 10,  # Increased from 8
         "fair_terms": 15,  # Increased from 12
         "privacy_best_practices": 15,  # Increased from 12
->>>>>>> main
     }
 
     # Apply risk deductions

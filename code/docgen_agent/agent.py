@@ -21,7 +21,7 @@ _MAX_LLM_RETRIES = 3
 _QUERIES_PER_SECTION = 5
 _THROTTLE_LLM_CALLS = os.getenv("THROTTLE_LLM_CALLS", "0")
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
 
 
 class Report(BaseModel):

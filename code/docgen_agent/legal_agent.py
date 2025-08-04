@@ -14,7 +14,7 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel
 
 from . import document_parser, risk_analyzer
-from .models import LegalDocument, LegalAgentState
+from .models import LegalAgentState, LegalDocument
 from .prompts import legal_analyzer_instructions
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ _THROTTLE_LLM_CALLS = os.getenv("THROTTLE_LLM_CALLS", "0")
 # Load API key from environment
 nvidia_api_key = os.getenv("NVIDIA_API_KEY")
 if nvidia_api_key:
-    llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+    llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
 else:
     llm = None
     _LOGGER.warning("NVIDIA_API_KEY not set. LLM features will be disabled.")
@@ -42,10 +42,10 @@ def parse_document(state: LegalAgentState, config: RunnableConfig):
     )
 
     result = document_parser.graph.invoke(parser_state, config)
-    
+
     return {
         "parsed_document": result.get("parsed_document"),
-        "messages": result.get("messages", [])
+        "messages": result.get("messages", []),
     }
 
 
@@ -62,13 +62,13 @@ def analyze_risks(state: LegalAgentState, config: RunnableConfig):
     )
 
     result = risk_analyzer.graph.invoke(analyzer_state, config)
-    
+
     return {
         "risk_analysis": result.get("risk_analysis", {}),
         "compliance_check": result.get("compliance_check", {}),
         "fairness_score": result.get("fairness_score", 0),
         "recommendations": result.get("recommendations", []),
-        "messages": result.get("messages", [])
+        "messages": result.get("messages", []),
     }
 
 
@@ -85,22 +85,25 @@ def generate_summary(state: LegalAgentState, config: RunnableConfig):
 
     system_prompt = legal_analyzer_instructions.format(
         document_type=state.document_type,
-        content=state.document_content[:2000]  # Limit for context
+        content=state.document_content[:2000],  # Limit for context
     )
 
     for count in range(_MAX_LLM_RETRIES):
         try:
             messages = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Please provide a plain English summary of this {state.document_type} document, highlighting any concerning clauses and explaining the risks in simple terms."}
+                {
+                    "role": "user",
+                    "content": f"Please provide a plain English summary of this {state.document_type} document, highlighting any concerning clauses and explaining the risks in simple terms.",
+                },
             ] + list(state.messages)
-            
+
             response = llm.invoke(messages, config)
             if response and response.content:
                 return {"summary": response.content}
         except Exception as e:
             _LOGGER.error(f"LLM call failed (attempt {count + 1}): {e}")
-        
+
         _LOGGER.debug(
             "Retrying LLM call. Attempt %d of %d", count + 1, _MAX_LLM_RETRIES
         )
@@ -135,8 +138,11 @@ def enhance_recommendations(state: LegalAgentState, config: RunnableConfig):
         """
 
         messages = [
-            {"role": "system", "content": "You are a legal expert specializing in consumer protection and compliance."},
-            {"role": "user", "content": analysis_prompt}
+            {
+                "role": "system",
+                "content": "You are a legal expert specializing in consumer protection and compliance.",
+            },
+            {"role": "user", "content": analysis_prompt},
         ]
 
         response = llm.invoke(messages, config)
@@ -177,19 +183,19 @@ graph = create_graph()
 def analyze_legal_document(
     content: str,
     title: str = "Unknown Document",
-    document_type: str = "Terms of Service"
+    document_type: str = "Terms of Service",
 ) -> dict:
     """Analyze a legal document and return the results."""
-    
+
     initial_state = LegalAgentState(
         document_content=content,
         document_title=title,
         document_type=document_type,
-        messages=[]
+        messages=[],
     )
-    
+
     result = graph.invoke(initial_state)
-    
+
     return {
         "document_title": result.document_title,
         "document_type": result.document_type,
@@ -198,5 +204,7 @@ def analyze_legal_document(
         "summary": result.summary,
         "fairness_score": result.fairness_score,
         "recommendations": result.recommendations,
-        "enhanced_recommendations": getattr(result, 'enhanced_recommendations', result.recommendations)
-    } 
+        "enhanced_recommendations": getattr(
+            result, "enhanced_recommendations", result.recommendations
+        ),
+    }

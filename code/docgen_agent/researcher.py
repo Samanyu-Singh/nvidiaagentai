@@ -19,7 +19,7 @@ _MAX_LLM_RETRIES = 3
 if not os.getenv("NVIDIA_API_KEY"):
     raise EnvironmentError("NVIDIA_API_KEY not set – cannot start ChatNVIDIA.")
 
-llm = ChatNVIDIA(model="meta/llama-3.3-70b-instruct", temperature=0)
+llm = ChatNVIDIA(model="meta/llama-3.1-8b-instruct", temperature=0)
 llm_with_tools = llm  #  ← no forced Tavily binding
 # If you still want Tavily search, uncomment next line
 # llm_with_tools = llm.bind_tools([tools.search_tavily])

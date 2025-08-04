@@ -9,7 +9,7 @@ A beautiful, modern web interface for LegalLensIQ - the intelligent Terms of Ser
 python3 server.py
 ```
 This will:
-- Start a web server on port 8000
+- Start a web server on port 8081
 - Automatically open your browser
 - Load the LegalLensIQ interface
 
