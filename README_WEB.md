@@ -29,6 +29,7 @@ Simply open `index.html` in any modern web browser.
 - **Risk Analysis**: Detects problematic clauses
 - **Compliance Check**: Validates against GDPR, COPPA, CCPA
 - **Smart Recommendations**: Actionable advice for improvement
+- **AI Chatbot**: Interactive legal assistant for document questions
 
 ### 🎨 Modern UI
 - **Responsive Design**: Works on desktop, tablet, and mobile
@@ -54,15 +55,15 @@ Validates against:
 
 ### Fairness Scoring
 - **Base Score**: 100 points
-- **Risk Deductions**: -20 for data selling, -15 for arbitration, etc.
-- **Compliance Bonuses**: +10 for GDPR, +5 for CCPA, etc.
+- **Risk Deductions**: -40 for data selling, -35 for extensive data sharing, -20 for broad data use, etc.
+- **Compliance Bonuses**: +15 for fair terms, +12 for GDPR, +10 for CCPA, etc.
 - **Final Score**: 0-100 with clear status indicators
 
-## 🎯 Perfect for Hackathons
+## 🎯 Professional Features
 
-### Professional Presentation
-- **Modern Design**: Looks professional and polished
-- **Interactive Demo**: Judges can try it themselves
+### Modern Interface
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Interactive Demo**: Users can try it themselves
 - **Clear Results**: Easy to understand analysis
 - **Mobile Friendly**: Works on any device
 
@@ -100,13 +101,13 @@ const riskDeductions = {
 };
 ```
 
-## 🎉 Ready for Your Hackathon!
+## 🎉 Ready to Use!
 
 Your LegalLensIQ web interface is:
 - ✅ **Professional looking**
 - ✅ **Fully functional**
-- ✅ **Easy to demonstrate**
-- ✅ **Impressive to judges**
-- ✅ **Ready to present**
+- ✅ **Easy to use**
+- ✅ **Production ready**
+- ✅ **Extensible**
 
-**Start the server and show off your intelligent legal document analyzer!** 
+**Start the server and analyze your legal documents!** 

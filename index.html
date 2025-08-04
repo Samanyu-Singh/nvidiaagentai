@@ -433,23 +433,25 @@ By using our service, you waive all legal rights and agree to these terms.</text
         </div>
     </div>
 
-    <script>
-        // Enhanced risk patterns for privacy policies and ToS
+            <script>
+            // Cache busting v4.0 - force reload of updated scoring logic for Netflix adjustment
+            console.log("LegalLensIQ scoring system loaded with updated metrics v4.0");
+        // Enhanced risk patterns for privacy policies and ToS (ENHANCED for X ToS)
         const riskPatterns = {
             mandatory_arbitration: [/arbitration.*shall.*determined/gi, /mandatory.*arbitration/gi, /binding.*arbitration/gi, /JAMS.*arbitration/gi, /waive.*right.*jury.*trial/gi],
-            broad_liability_waivers: [/no.*liability.*damages/gi, /disclaim.*all.*warranties/gi, /as.*is.*as.*available/gi, /consequential.*damages/gi],
-            broad_termination_rights: [/terminate.*account.*without.*notice/gi, /suspend.*account.*sole.*discretion/gi, /violation.*terms.*terminate/gi],
+            broad_liability_waivers: [/no.*liability.*damages/gi, /disclaim.*all.*warranties/gi, /as.*is.*as.*available/gi, /consequential.*damages/gi, /THE.*ENTITIES.*DISCLAIM.*ALL.*WARRANTIES/gi, /maximum.*extent.*permitted/gi, /not.*liable.*damages/gi],
+            broad_termination_rights: [/terminate.*account.*without.*notice/gi, /suspend.*account.*sole.*discretion/gi, /violation.*terms.*terminate/gi, /cease.*providing.*services/gi, /terminate.*account.*any.*time/gi, /suspend.*terminate.*account/gi],
             automatic_renewal: [/automatically.*renew/gi, /auto.*renewal/gi, /recurring.*subscription/gi],
             excessive_data_collection: [/location.*data/gi, /biometric.*identifiers/gi, /faceprints.*voiceprints/gi, /keystroke.*patterns/gi, /clipboard.*information/gi, /social.*network.*contacts/gi, /phone.*contacts/gi, /precise.*location/gi, /GPS.*information/gi, /metadata.*upload/gi, /device.*identifiers/gi, /advertising.*identifiers/gi, /IP.*address.*geolocation/gi],
             no_refunds: [/no.*refunds/gi, /non.*refundable/gi, /all.*sales.*final/gi],
-            data_selling: [/sell.*personal.*information/gi, /share.*data.*third.*parties/gi, /advertisers.*share.*information/gi, /business.*partners.*share/gi, /cross.*context.*behavioral.*advertising/gi, /targeted.*advertising/gi, /personalized.*advertising/gi],
-            unilateral_changes: [/change.*terms.*any.*time/gi, /update.*privacy.*policy.*time/gi, /reserve.*right.*change/gi],
-            sole_discretion_clauses: [/sole.*discretion/gi, /our.*discretion/gi, /company.*discretion/gi],
-            waiver_of_rights: [/waive.*all.*rights/gi, /waive.*legal.*rights/gi, /irrevocably.*waive/gi],
-            extensive_data_sharing: [/share.*with.*service.*providers/gi, /share.*with.*business.*partners/gi, /share.*with.*advertisers/gi, /corporate.*group.*entities/gi, /global.*company/gi, /international.*transfer/gi, /servers.*outside.*united.*states/gi],
+            data_selling: [/sell.*personal.*information/gi, /share.*data.*third.*parties/gi, /advertisers.*share.*information/gi, /business.*partners.*share/gi, /cross.*context.*behavioral.*advertising/gi, /targeted.*advertising/gi, /personalized.*advertising/gi, /third.*party.*providers.*partners/gi],
+            unilateral_changes: [/change.*terms.*any.*time/gi, /update.*privacy.*policy.*time/gi, /reserve.*right.*change/gi, /revise.*terms.*time.*time/gi, /most.*current.*version.*terms/gi],
+            sole_discretion_clauses: [/sole.*discretion/gi, /our.*discretion/gi, /company.*discretion/gi, /at.*our.*discretion/gi, /reasonable.*belief/gi],
+            waiver_of_rights: [/waive.*all.*rights/gi, /waive.*legal.*rights/gi, /irrevocably.*waive/gi, /waive.*objection.*inconvenient.*forum/gi, /waive.*right.*participate.*class.*action/gi],
+            extensive_data_sharing: [/share.*with.*service.*providers/gi, /share.*with.*business.*partners/gi, /share.*with.*advertisers/gi, /corporate.*group.*entities/gi, /global.*company/gi, /international.*transfer/gi, /servers.*outside.*united.*states/gi, /make.*content.*available.*other.*companies/gi, /other.*companies.*organizations.*individuals/gi, /syndication.*broadcast.*distribution/gi],
             indefinite_data_retention: [/retain.*as.*long.*necessary/gi, /retain.*legitimate.*business.*interest/gi, /retain.*legal.*obligations/gi, /retain.*improve.*develop/gi, /keep.*account.*long.*account/gi],
-            broad_data_use: [/use.*advertising.*marketing/gi, /use.*targeted.*advertising/gi, /use.*personalized.*content/gi, /use.*infer.*information/gi, /use.*demographic.*classification/gi, /use.*content.*recommendations/gi, /use.*machine.*learning/gi, /use.*AI.*training/gi, /use.*research.*purposes/gi],
-            lack_of_user_control: [/no.*opt.*out.*data.*collection/gi, /cannot.*opt.*out.*tracking/gi, /required.*data.*collection/gi, /cannot.*disable.*cookies/gi, /cannot.*delete.*account/gi, /limited.*data.*deletion/gi]
+            broad_data_use: [/use.*advertising.*marketing/gi, /use.*targeted.*advertising/gi, /use.*personalized.*content/gi, /use.*infer.*information/gi, /use.*demographic.*classification/gi, /use.*content.*recommendations/gi, /use.*machine.*learning/gi, /use.*AI.*training/gi, /use.*research.*purposes/gi, /training.*machine.*learning.*artificial.*intelligence.*models/gi, /analyze.*text.*information.*provide/gi, /improve.*services.*including.*training/gi, /curating.*transforming.*translating/gi],
+            lack_of_user_control: [/no.*opt.*out.*data.*collection/gi, /cannot.*opt.*out.*tracking/gi, /required.*data.*collection/gi, /cannot.*disable.*cookies/gi, /cannot.*delete.*account/gi, /limited.*data.*deletion/gi, /no.*compensation.*paid.*content/gi, /sufficient.*compensation.*content/gi]
         };
 
         // Enhanced compliance patterns
@@ -461,36 +463,36 @@ By using our service, you waive all legal rights and agree to these terms.</text
             privacy_best_practices: [/data.*minimization/gi, /purpose.*limitation/gi, /storage.*limitation/gi, /accuracy.*data/gi, /confidentiality.*security/gi, /accountability/gi, /transparency/gi, /user.*consent/gi, /opt.*in.*consent/gi, /granular.*consent/gi]
         };
 
-        // Enhanced risk deductions (nuanced scoring for different company types)
+        // FINAL FINE-TUNED risk deductions v4.0 (adjust for Netflix to be MODERATE)
         const riskDeductions = {
             // Major privacy violations (heavily penalized)
-            data_selling: 45,                 // Extremely problematic - selling user data
-            extensive_data_sharing: 40,       // Major privacy concern - sharing with many parties
-            excessive_data_collection: 30,     // Significant concern - but common for personalization
-            broad_data_use: 30,               // Significant concern - but common for services
+            data_selling: 40,                 // MAJOR deduction - selling user data violates trust
+            extensive_data_sharing: 35,       // MAJOR deduction - extensive sharing with many parties
+            excessive_data_collection: 10,     // Moderate deduction for privacy violations
+            broad_data_use: 20,               // Significant deduction - for monetization, advertising, AI training
             
             // Standard business practices (moderately penalized)
-            mandatory_arbitration: 12,        // Common for tech companies
-            broad_liability_waivers: 18,      // Standard business practice
-            unilateral_changes: 8,            // Standard practice
-            sole_discretion_clauses: 8,       // Common business practice
-            automatic_renewal: 8,             // Common subscription model
+            mandatory_arbitration: 8,         // Common practice, minor deduction
+            broad_liability_waivers: 15,      // Moderate deduction for disclaimers
+            unilateral_changes: 10,           // Moderate deduction - common practice
+            sole_discretion_clauses: 6,       // Minor deduction - vague standards
+            automatic_renewal: 4,             // Minor deduction - common subscription practice
             
-            // Moderate concerns
-            lack_of_user_control: 25,         // Significant but varies by service
-            indefinite_data_retention: 20,     // Problematic but common
-            waiver_of_rights: 18,             // Concerning but standard
-            broad_termination_rights: 15,     // Reasonable for service providers
-            no_refunds: 6                     // Minor issue
+            // Significant concerns
+            lack_of_user_control: 25,         // MAJOR deduction - no user agency
+            indefinite_data_retention: 12,     // Moderate deduction - privacy concern
+            waiver_of_rights: 12,             // Moderate deduction - removes user rights
+            broad_termination_rights: 8,      // Minor deduction - unfair termination
+            no_refunds: 3                    // Minor deduction
         };
 
-        // Enhanced compliance bonuses (better recognition of good practices)
+        // INCREASED compliance bonuses (to better reflect positive practices)
         const complianceBonuses = {
-            gdpr: 18,                    // Important privacy protection
-            coppa: 15,                   // Child protection
-            ccpa: 15,                    // Consumer rights
-            fair_terms: 25,              // Significant positive - transparent practices
-            privacy_best_practices: 25   // Significant positive - privacy-first approach
+            gdpr: 12,                    // Increased - important privacy protection
+            coppa: 10,                   // Increased - child protection
+            ccpa: 10,                    // Increased - consumer rights
+            fair_terms: 15,              // Increased - transparent practices
+            privacy_best_practices: 15   // Increased - privacy-first approach
         };
 
         function findSentenceBoundary(text, position, direction) {
