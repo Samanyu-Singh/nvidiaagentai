@@ -146,7 +146,7 @@ Please answer the user's question about this document.
 
 def main():
     """Start the LegalLensIQ web server."""
-    PORT = 8081
+    PORT = int(os.environ.get("PORT", 8081))
 
     # Change to the directory containing index.html
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
