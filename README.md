@@ -6,11 +6,20 @@ LegalLensIQ is a sophisticated AI-powered platform that analyzes Terms of Servic
 
 ## 🚀 Features
 
+<<<<<<< main
+- **Automated Risk Detection:** Identifies unfair clauses using pattern matching
+- **Fairness Scoring:** 0-100 score based on legal best practices
+- **Interactive Chatbot:** Ask questions about specific documents
+- **Real-time Analysis:** Instant results with detailed explanations
+- **Privacy Rights Guidance:** GDPR, CCPA, and consumer protection
+- **Document Analysis:** Comprehensive legal document parsing and analysis
+=======
 ### 📊 **Smart Analysis**
 - **Automated Risk Detection**: Identifies unfair clauses using advanced pattern matching
 - **Fairness Scoring**: 0-100 score based on legal best practices and consumer protection standards
 - **Real-time Analysis**: Instant results with detailed explanations and context
 - **Multi-Document Support**: Analyze Terms of Service, Privacy Policies, and EULAs
+>>>>>>> main
 
 ### 🤖 **AI-Powered Chatbot**
 - **Interactive Legal Assistant**: Ask questions about specific documents
@@ -18,11 +27,19 @@ LegalLensIQ is a sophisticated AI-powered platform that analyzes Terms of Servic
 - **Multi-Agent System**: Specialized agents for research, legal analysis, and document generation
 - **Real-time Chat**: Built-in chatbot interface for document-specific questions
 
+<<<<<<< main
+- **Frontend:** HTML/CSS/JavaScript
+- **Backend:** Python HTTP Server
+- **AI:** NVIDIA AI Endpoints (Llama 3.1 8B)
+- **Pattern Matching:** Enhanced regex for legal clause detection
+- **Document Processing:** PDF parsing and text extraction
+=======
 ### 🛡️ **Compliance & Privacy**
 - **GDPR Compliance**: Detects data protection and user rights clauses
 - **CCPA Compliance**: California privacy rights validation
 - **COPPA Compliance**: Children's privacy protection checking
 - **Privacy Rights Guidance**: Understand your data rights and protections
+>>>>>>> main
 
 ## 🛠️ Technology Stack
 
@@ -51,6 +68,34 @@ LegalLensIQ is a sophisticated AI-powered platform that analyzes Terms of Servic
 
 ## ⚡ Quick Start
 
+<<<<<<< main
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/legal-lens-iq.git
+   cd legal-lens-iq
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Set up NVIDIA API key:**
+   ```bash
+   cp secrets.env.example secrets.env
+   # Edit secrets.env with your NVIDIA API key (do NOT commit this file)
+   ```
+
+4. **Run the web server:**
+   ```bash
+   python server.py
+   ```
+
+5. **Open in browser:**
+   ```
+   http://localhost:8081
+   ```
+=======
 ### 1. **Clone the Repository**
 ```bash
 git clone https://github.com/Samanyu-Singh/nvidiaagentai.git
@@ -80,6 +125,7 @@ python server.py
 ```
 http://localhost:8000
 ```
+>>>>>>> main
 
 ## 📊 How the Fairness Score Works
 
@@ -224,8 +270,12 @@ MIT License - see LICENSE file for details
 
 ## 🙏 Acknowledgments
 
+<<<<<<< main
+- Built with NVIDIA's AI Endpoints
+=======
 - Built with **NVIDIA's AgentIQ Toolkit**
 - Powered by **LangChain** and **LangGraph**
+>>>>>>> main
 - Inspired by consumer protection needs
 - Designed for modern legal document analysis
 
